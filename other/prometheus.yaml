@@ -1,0 +1,6 @@
+scrape_configs:
+- job_name: co2monitor
+  scrape_interval: 30s
+  static_configs:
+  - targets:
+    - co2monitor:8888

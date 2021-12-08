@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var device = "/dev/hidraw8"
+var device = "/dev/hidraw0"
 
 func TestOpen(t *testing.T) {
 	meter := new(Meter)
@@ -41,7 +41,7 @@ func TestRead(t *testing.T) {
 	require.NoError(t, err)
 	defer meter.Close()
 
-	result, err := meter.Read()
+	result, err := meter.Read(True)
 	require.NoError(t, err)
 
 	log.Printf("Temp: '%v', CO2: '%v'", result.Temperature, result.Co2)

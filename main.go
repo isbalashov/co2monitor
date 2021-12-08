@@ -14,7 +14,8 @@ import (
 var (
 	device     = kingpin.Arg("device", "CO2 Meter device, such as /dev/hidraw2").Required().String()
 	listenAddr = kingpin.Arg("listen-address", "The address to listen on for HTTP requests.").
-			Default(":8080").String()
+			Default(":8888").String()
+	noDecryptMessage   = kingpin.Flag("no-decrypt-message", "Do not decrypt message from the device").Default("false").Bool()
 )
 
 var (
@@ -34,6 +35,7 @@ func init() {
 }
 
 func main() {
+	
 	kingpin.Parse()
 	http.Handle("/metrics", promhttp.Handler())
 	go measure()
@@ -48,9 +50,11 @@ func measure() {
 		log.Fatalf("Could not open '%v'", *device)
 		return
 	}
-
+	if *noDecryptMessage{
+		log.Printf("Skipping message decryption")
+	}
 	for {
-		result, err := meter.Read()
+		result, err := meter.Read(*noDecryptMessage)
 		if err != nil {
 			log.Fatalf("Something went wrong: '%v'", err)
 		}

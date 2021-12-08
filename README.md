@@ -1,6 +1,3 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/larsp/co2monitor)](https://goreportcard.com/report/github.com/larsp/co2monitor)
-[![GoDoc](https://godoc.org/github.com/larsp/co2monitor/meter?status.svg)](https://godoc.org/github.com/larsp/co2monitor/meter)
-
 # CO₂ monitor
 
 ## Setup & Example
@@ -39,6 +36,7 @@ usage: co2monitor [<flags>] <device> [<listen-address>]
 
 Flags:
   --help  Show context-sensitive help (also try --help-long and --help-man).
+  --no-decrypt-message  Do not decrypt message from the device.
 
 Args:
   <device>            CO2 Meter device, such as /dev/hidraw2
@@ -52,7 +50,12 @@ $ ./co2monitor /dev/hidraw2
 2018/01/18 13:09:31 Device '/dev/hidraw2' opened
 
 ```
+Added option to skip message decryption, required for some devices
 
+Run with docker
+```
+docker run --rm -it --device /dev/hidraw0 -p 8080:8080 <imagename> /dev/hidraw0
+```
 ## Credit
 
 [Henryk Plötz](https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us)

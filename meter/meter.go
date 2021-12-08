@@ -74,7 +74,7 @@ func (m *Meter) ioctl() error {
 
 // Read will read from the device file until it finds a temperature and co2 measurement. Before it can be used the
 // device file needs to be opened via Open.
-func (m *Meter) Read() (*Measurement, error) {
+func (m *Meter) Read(noDecryptMessage bool) (*Measurement, error) {
 	if atomic.LoadInt32(&m.opened) != 1 {
 		return nil, errors.New("Device needs to be opened")
 	}
@@ -87,11 +87,22 @@ func (m *Meter) Read() (*Measurement, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "Could not read from: '%v'", m.file.Name())
 		}
+		var operation uint
+		var value uint
 
-		decrypted := m.decrypt(result)
+		if noDecryptMessage {
+			data := make([]uint, 8)
+			for i := 0; i < 8; i++ {
+				data[i] = uint(result[i])
+			}
+			operation = uint(data[0])
+			value = data[1]<<8 | data[2]
 
-		operation := decrypted[0]
-		value := decrypted[1]<<8 | decrypted[2]
+		} else {
+			decrypted := m.decrypt(result)
+			operation = decrypted[0]
+			value = decrypted[1]<<8 | decrypted[2]
+		}
 
 		switch byte(operation) {
 		case meterCO2:
@@ -108,33 +119,33 @@ func (m *Meter) Read() (*Measurement, error) {
 
 // decrypt is a clone of the python decrypt function of the original article: https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us
 func (m *Meter) decrypt(data []byte) []uint {
-	state := []uint{0x48, 0x74, 0x65, 0x6D, 0x70, 0x39, 0x39, 0x65}
-	shuffle := []int{2, 4, 0, 7, 1, 6, 5, 3}
+		state := []uint{0x48, 0x74, 0x65, 0x6D, 0x70, 0x39, 0x39, 0x65}
+		shuffle := []int{2, 4, 0, 7, 1, 6, 5, 3}
+	
+		phase1 := make([]uint, 8)
+		for i := range shuffle {
+			phase1[shuffle[i]] = uint(data[i])
+		}
+	
+		phase2 := make([]uint, 8)
+		for i := 0; i < 8; i++ {
+			phase2[i] = phase1[i] ^ uint(key[i])
+		}
+	
+		phase3 := make([]uint, 8)
+		for i := 0; i < 8; i++ {
+			phase3[i] = ((phase2[i] >> 3) | (phase2[(i-1+8)%8] << 5)) & 0xff
+		}
+	
+		tmp := make([]uint, 8)
+		for i := 0; i < 8; i++ {
+			tmp[i] = ((state[i] >> 4) | (state[i] << 4)) & 0xff
+		}
+		result := make([]uint, 8)
+		for i := 0; i < 8; i++ {
+			result[i] = (0x100 + phase3[i] - tmp[i]) & 0xff
+		}
 
-	phase1 := make([]uint, 8)
-	for i := range shuffle {
-		phase1[shuffle[i]] = uint(data[i])
-	}
-
-	phase2 := make([]uint, 8)
-	for i := 0; i < 8; i++ {
-		phase2[i] = phase1[i] ^ uint(key[i])
-	}
-
-	phase3 := make([]uint, 8)
-	for i := 0; i < 8; i++ {
-		phase3[i] = ((phase2[i] >> 3) | (phase2[(i-1+8)%8] << 5)) & 0xff
-	}
-
-	tmp := make([]uint, 8)
-	for i := 0; i < 8; i++ {
-		tmp[i] = ((state[i] >> 4) | (state[i] << 4)) & 0xff
-	}
-
-	result := make([]uint, 8)
-	for i := 0; i < 8; i++ {
-		result[i] = (0x100 + phase3[i] - tmp[i]) & 0xff
-	}
 	return result
 }
 
