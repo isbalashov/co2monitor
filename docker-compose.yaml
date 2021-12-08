@@ -8,7 +8,7 @@ services:
     command:
     - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-    - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - ./other/prometheus.yml:/etc/prometheus/prometheus.yml:ro
   co2monitor:
     build: .
     container_name: co2monitor
