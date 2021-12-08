@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/larsp/co2monitor/meter"
+	"github.com/isbalashov/co2monitor/meter"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

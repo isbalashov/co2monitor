@@ -1,4 +1,4 @@
-FROM golang:1.9.3-stretch AS build-env
+FROM golang:1.17.4-buster AS build-env
 
 WORKDIR /go/src/github.com/isbalashov/co2monitor
 COPY . ./
