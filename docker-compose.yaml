@@ -8,11 +8,11 @@ services:
     command:
     - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-    - ./other/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - ./other/prometheus/:/etc/prometheus/
   co2monitor:
     build: .
     container_name: co2monitor
-    device:
+    devices:
     - /dev/hidraw0 
     ports:
     - 8888:8888
@@ -24,4 +24,4 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - other/grafana/datasources:/etc/grafana/provisioning/datasources      
+      - ./other/grafana/datasources:/etc/grafana/provisioning/datasources
