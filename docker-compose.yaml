@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   prometheus:
+    restart: always
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
@@ -10,6 +11,7 @@ services:
     volumes:
     - ./other/prometheus/:/etc/prometheus/
   co2monitor:
+    restart: always
     build: .
     container_name: co2monitor
     devices:
@@ -20,8 +22,10 @@ services:
     - --no-decrypt-message
     - /dev/hidraw0
   grafana:
+    restart: always
     image: grafana/grafana-oss:8.2.0
     ports:
       - 3000:3000
     volumes:
       - ./other/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./other/grafana/dashboards:/etc/grafana/provisioning/dashboards
