@@ -28,4 +28,3 @@ services:
       - 3000:3000
     volumes:
       - ./other/grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./other/grafana/dashboards:/etc/grafana/provisioning/dashboards
